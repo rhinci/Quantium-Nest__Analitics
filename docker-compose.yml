@@ -11,6 +11,7 @@ services:
       CLICKHOUSE_PASSWORD: quantium_pass
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse/init:/docker-entrypoint-initdb.d:ro
     ulimits:
       nofile:
         soft: 262144
