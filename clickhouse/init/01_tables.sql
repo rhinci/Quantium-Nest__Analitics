@@ -32,60 +32,72 @@ CREATE TABLE IF NOT EXISTS quantium.customers
     customer_id  UInt64,
     full_name    String,
     email        String,
-    city         LowCardinality(String)
+    city_id         UInt32
 )
 ENGINE = MergeTree
 ORDER BY customer_id;
 
 
-
+CREATE TABLE IF NOT EXISTS quantium.cities
+(
+    city_id    UInt32,
+    city_name  String
+)
+ENGINE = MergeTree
+ORDER BY city_id;
 
 CREATE TABLE IF NOT EXISTS quantium.orders
 (
     order_id         UInt64,
-    customer_id      UInt64,
+    order_item_id    UInt64,
     created_at       DateTime,
+    customer_id      UInt64,
     device_type      LowCardinality(String),
     payment_method   LowCardinality(String),
     delivery_method  LowCardinality(String),
     promo_code       Bool,
-    total_price      Decimal(12, 2)
+    product_id       UInt32,
+    quantity         UInt16,
+    unit_price       Decimal(10, 2)
 )
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(created_at)
 ORDER BY (created_at, order_id);
 
-CREATE TABLE IF NOT EXISTS quantium.order_items
+
+
+
+CREATE TABLE IF NOT EXISTS quantium.sales_daily
 (
-    order_item_id  UInt64,
-    order_id       UInt64,
+    day           Date,
+    orders_count  AggregateFunction(uniq, UInt64),
+    items_sold    SimpleAggregateFunction(sum, UInt64),
+    revenue       SimpleAggregateFunction(sum, Decimal(38, 2))
+)
+ENGINE = AggregatingMergeTree
+PARTITION BY toYYYYMM(day)
+ORDER BY day;
+
+CREATE TABLE IF NOT EXISTS quantium.sales_by_product
+(
+    day            Date,
     product_id     UInt32,
-    quantity       UInt16,
-    unit_price     Decimal(10, 2)
+    orders_count   AggregateFunction(uniq, UInt64),
+    quantity_sold  SimpleAggregateFunction(sum, UInt64),
+    revenue        SimpleAggregateFunction(sum, Decimal(38, 2))
 )
-ENGINE = MergeTree
-ORDER BY (order_id, order_item_id);
+ENGINE = AggregatingMergeTree
+PARTITION BY toYYYYMM(day)
+ORDER BY (product_id, day);
 
-CREATE TABLE IF NOT EXISTS quantium.order_status_events
+CREATE TABLE IF NOT EXISTS quantium.customer_stats
 (
-    order_id      UInt64,
-    event_time    DateTime,
-    order_status  LowCardinality(String)
+    customer_id       UInt64,
+    total_orders      AggregateFunction(uniq, UInt64),
+    total_items       SimpleAggregateFunction(sum, UInt64),
+    total_revenue     SimpleAggregateFunction(sum, Decimal(38, 2)),
+    first_order_date  SimpleAggregateFunction(min, Date),
+    last_order_date   SimpleAggregateFunction(max, Date)
 )
-ENGINE = MergeTree
-PARTITION BY toYYYYMM(event_time)
-ORDER BY (event_time, order_id);
-
-
-
-
-CREATE TABLE IF NOT EXISTS quantium.orders_per_minute
-(
-    minute          DateTime,
-    payment_method  LowCardinality(String),
-    orders_count    UInt64,
-    revenue         Decimal(18, 2)
-)
-ENGINE = SummingMergeTree
-PARTITION BY toYYYYMM(minute)
-ORDER BY (minute, payment_method);
+ENGINE = AggregatingMergeTree
+ORDER BY customer_id;
