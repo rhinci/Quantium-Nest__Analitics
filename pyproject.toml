@@ -1,7 +1,7 @@
 [project]
 name = "generator"
 version = "0.1.0"
-description = "Add your description here"
+description = "Генератор потока заказов интернет-магазина Quantium Nest"
 readme = "README.md"
 authors = [
     { name = "rhinci", email = "dashalupanova@gmail.com" }
@@ -25,3 +25,19 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.17.1",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+strict = true
