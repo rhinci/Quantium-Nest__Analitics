@@ -1,6 +1,7 @@
 import pytest
-from generator.config import ClickHouseSettings, GeneratorSettings
 from pydantic import ValidationError
+
+from generator.config import ClickHouseSettings, GeneratorSettings
 
 
 def test_generator_defaults() -> None:
