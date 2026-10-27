@@ -24,6 +24,7 @@ class GeneratorSettings(_EnvSettings):
     model_config = SettingsConfigDict(env_prefix="GENERATOR_")
 
     seed: int = 42
+    customers_count: int = Field(default=5000, ge=1)
     tick_interval_seconds: float = Field(default=1.0, gt=0)
     base_orders_per_minute: float = Field(default=30.0, gt=0)
 

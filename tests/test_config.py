@@ -8,6 +8,7 @@ def test_generator_defaults() -> None:
     settings = GeneratorSettings(_env_file=None)
     assert settings.seed == 42
     assert settings.tick_interval_seconds == 1.0
+    assert settings.customers_count == 5000
 
 
 def test_env_overrides_default(monkeypatch: pytest.MonkeyPatch) -> None:
